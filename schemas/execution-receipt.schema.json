@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/execution-receipt.schema.json",
+  "title": "Execution and contribution receipt",
+  "type": "object",
+  "required": ["schema_version", "task_id", "status", "accepted", "nodes"],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "task_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["accepted", "failed_acceptance", "rejected_before_execution"]},
+    "accepted": {"type": "boolean"},
+    "run_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "route": {"type": "array", "items": {"type": "string"}},
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["capability_id", "version", "input_digest", "output_digest", "consumed_by", "contribution_state"],
+        "properties": {
+          "capability_id": {"type": "string"},
+          "version": {"type": "string"},
+          "input_digest": {"type": "string"},
+          "output_digest": {"type": "string"},
+          "consumed_by": {"type": "string"},
+          "contribution_state": {"enum": ["consumed", "evaluated", "accepted_output"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "model_usage": {
+      "type": "object",
+      "properties": {
+        "calls": {"type": "integer", "minimum": 0},
+        "input_tokens": {"type": "integer", "minimum": 0},
+        "output_tokens": {"type": "integer", "minimum": 0},
+        "cost_usd": {"type": ["number", "null"]}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}
+

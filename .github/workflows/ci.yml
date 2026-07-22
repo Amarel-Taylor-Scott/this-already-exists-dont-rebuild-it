@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install the project and experiment dependencies
+        run: python -m pip install --upgrade pip ".[retrieval,execution,dev]"
+      - name: Lint
+        run: python -m ruff check src tests
+      - name: Test
+        run: python -m pytest
+      - name: Replay the checked-in seed
+        if: matrix.python-version == '3.12'
+        run: |
+          reuse-code doctor
+          reuse-code benchmark-retrieval --output "$RUNNER_TEMP/retrieval-benchmark.json"
+          reuse-code run-seed --output-dir "$RUNNER_TEMP/receipts"

@@ -1,0 +1,89 @@
+{
+  "schema_version": "1",
+  "tasks": [
+    {
+      "task_id": "direct_csv_load",
+      "track": "direct_reuse",
+      "prompt": "Load the supplied comma-separated transaction file as a table.",
+      "input_artifact_type": "file/csv",
+      "required_output_type": "table/pandas-dataframe",
+      "required_stages": ["load"],
+      "input_path": "data/seed/transactions.csv",
+      "expected_columns": ["category", "amount"],
+      "expected_row_count": 5,
+      "route": [
+        {"capability_id": "pandas.read_csv", "bindings": {}}
+      ]
+    },
+    {
+      "task_id": "grouped_json_report",
+      "track": "multi_capability_composition",
+      "prompt": "Read the transaction CSV, replace missing amounts with zero, sum amount by category, and write JSON records.",
+      "input_artifact_type": "file/csv",
+      "required_output_type": "file/json-records",
+      "required_stages": ["load", "missing-values", "group", "aggregate", "adapt", "write"],
+      "input_path": "data/seed/transactions.csv",
+      "expected_rows": [
+        {"category": "A", "amount": 10.0},
+        {"category": "B", "amount": 12.0},
+        {"category": "C", "amount": 2.0}
+      ],
+      "route": [
+        {"capability_id": "pandas.read_csv", "bindings": {}},
+        {"capability_id": "pandas.DataFrame.fillna", "bindings": {"value": {"amount": 0}}},
+        {"capability_id": "pandas.DataFrame.groupby", "bindings": {"by": "category"}},
+        {"capability_id": "pandas.core.groupby.DataFrameGroupBy.sum", "bindings": {"column": "amount"}},
+        {"capability_id": "pandas.Series.reset_index", "bindings": {"name": "amount"}},
+        {"capability_id": "pandas.DataFrame.to_json", "bindings": {"path": "reports/live/grouped_json_report.json"}}
+      ]
+    },
+    {
+      "task_id": "csv_json_hard_negative",
+      "track": "hard_negative",
+      "prompt": "Load the supplied CSV as a table; reject readers for other input formats.",
+      "input_artifact_type": "file/csv",
+      "required_output_type": "table/pandas-dataframe",
+      "required_stages": ["load"],
+      "input_path": "data/seed/transactions.csv",
+      "candidate_route": [
+        {"capability_id": "pandas.read_json", "bindings": {}}
+      ],
+      "expected_decision": "rejected_before_execution"
+    },
+    {
+      "task_id": "unsupported_company_ledger",
+      "track": "no_reuse",
+      "prompt": "Apply the private company ledger semantics and emit the proprietary ledger artifact.",
+      "input_artifact_type": "file/csv",
+      "required_output_type": "file/company-ledger-v7",
+      "required_stages": ["company-policy-v7"],
+      "input_path": "data/seed/transactions.csv",
+      "expected_decision": "no_valid_route"
+    },
+    {
+      "task_id": "residual_category_adjustment",
+      "track": "partial_residual",
+      "prompt": "Reuse the standard CSV aggregation route, then apply the task-specific 10 percent B-category adjustment and write JSON records.",
+      "input_artifact_type": "file/csv",
+      "required_output_type": "file/json-records",
+      "required_stages": ["load", "missing-values", "group", "aggregate", "adapt", "residual-custom", "write"],
+      "input_path": "data/seed/transactions.csv",
+      "allow_residual": true,
+      "expected_rows": [
+        {"category": "A", "amount": 10.0},
+        {"category": "B", "amount": 13.2},
+        {"category": "C", "amount": 2.0}
+      ],
+      "route": [
+        {"capability_id": "pandas.read_csv", "bindings": {}},
+        {"capability_id": "pandas.DataFrame.fillna", "bindings": {"value": {"amount": 0}}},
+        {"capability_id": "pandas.DataFrame.groupby", "bindings": {"by": "category"}},
+        {"capability_id": "pandas.core.groupby.DataFrameGroupBy.sum", "bindings": {"column": "amount"}},
+        {"capability_id": "pandas.Series.reset_index", "bindings": {"name": "amount"}},
+        {"capability_id": "residual.category_adjustment", "bindings": {"category": "B", "category_column": "category", "value_column": "amount", "multiplier": 1.1}},
+        {"capability_id": "pandas.DataFrame.to_json", "bindings": {"path": "reports/live/residual_category_adjustment.json"}}
+      ]
+    }
+  ]
+}
+

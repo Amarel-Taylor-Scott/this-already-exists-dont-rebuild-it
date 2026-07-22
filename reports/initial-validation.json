@@ -1,0 +1,116 @@
+{
+  "schema_version": "1",
+  "recorded_on": "2026-07-21",
+  "status": "engineering_smoke_only",
+  "warnings": [
+    "The retrieval corpus has nine operations and six tasks; it is too small for a research conclusion.",
+    "The five-package catalog validates storage and symbol-level lookup, not semantic correctness or ecosystem-scale readiness.",
+    "No small-model inference result is claimed by this report."
+  ],
+  "software_validation": {
+    "pytest": {"passed": 31, "failed": 0},
+    "ruff": "passed",
+    "wheel_and_sdist_build": "passed",
+    "notebooks": {
+      "count": 3,
+      "json_and_python_source_validation": "passed",
+      "stored_execution_outputs": 0
+    }
+  },
+  "installed_artifact_catalog": {
+    "ingestion_policy": {
+      "target_packages_imported": false,
+      "target_code_executed": false,
+      "build_files_executed": false,
+      "max_python_files_per_distribution": 350,
+      "max_total_bytes_per_distribution": 75000000,
+      "include_private_symbols": false
+    },
+    "package_versions": {
+      "numpy": "2.5.1",
+      "packaging": "26.2",
+      "pandas": "3.0.3",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.18.0"
+    },
+    "counts": {
+      "packages": 5,
+      "operations": 21875,
+      "representations": 72369,
+      "signals": 234281,
+      "dependencies": 182,
+      "errors": 4
+    },
+    "errors_by_type": {"file_count_limit_exceeded": 4},
+    "sqlite_bytes": 213196800,
+    "sqlite_integrity_check": "ok",
+    "fts_smoke_query": {
+      "query": "parse version requirement",
+      "first_operation": "packaging._parser.parse_requirement",
+      "first_package_version": "packaging==26.2"
+    }
+  },
+  "retrieval_seed": {
+    "operation_count": 9,
+    "task_count": 6,
+    "metrics": {
+      "exact_unblocked_v1": {
+        "recall_at_1": 0.3,
+        "mean_reciprocal_rank": 0.45,
+        "abstention_accuracy": 0.8333333333333334,
+        "hard_negative_violation_rate": 0.0,
+        "mean_candidate_reduction": 0.0
+      },
+      "word_unblocked_v1": {
+        "recall_at_1": 0.7,
+        "mean_reciprocal_rank": 0.8666666666666666,
+        "abstention_accuracy": 0.8333333333333334,
+        "hard_negative_violation_rate": 0.3333333333333333,
+        "mean_candidate_reduction": 0.0
+      },
+      "char_unblocked_v1": {
+        "recall_at_1": 0.7,
+        "mean_reciprocal_rank": 0.9,
+        "abstention_accuracy": 0.8333333333333334,
+        "hard_negative_violation_rate": 0.3333333333333333,
+        "mean_candidate_reduction": 0.0
+      },
+      "fts_unblocked_v1": {
+        "recall_at_1": 0.7,
+        "mean_reciprocal_rank": 0.9,
+        "abstention_accuracy": 0.8333333333333334,
+        "hard_negative_violation_rate": 0.3333333333333333,
+        "mean_candidate_reduction": 0.0
+      },
+      "hybrid_unblocked_v1": {
+        "recall_at_1": 0.7,
+        "mean_reciprocal_rank": 0.8666666666666666,
+        "abstention_accuracy": 0.8333333333333334,
+        "hard_negative_violation_rate": 0.3333333333333333,
+        "mean_candidate_reduction": 0.0
+      },
+      "hybrid_blocked_v1": {
+        "recall_at_1": 0.9,
+        "mean_reciprocal_rank": 1.0,
+        "abstention_accuracy": 1.0,
+        "hard_negative_violation_rate": 0.0,
+        "mean_candidate_reduction": 0.6666666666666666
+      }
+    }
+  },
+  "execution_seed": {
+    "task_count": 5,
+    "passed_task_count": 5,
+    "model_calls": 0,
+    "tracks": {
+      "direct_reuse": "accepted",
+      "multi_capability_composition": "accepted",
+      "hard_negative": "rejected_before_execution",
+      "no_reuse": "no_valid_route",
+      "partial_residual": {
+        "status": "accepted",
+        "residual_authored_lines": 7
+      }
+    }
+  }
+}

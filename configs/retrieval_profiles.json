@@ -1,0 +1,118 @@
+{
+  "schema_version": "1",
+  "profiles": [
+    {
+      "profile_id": "exact",
+      "config_id": "exact_base_v1",
+      "result_limit": 10,
+      "channels": [
+        {
+          "channel_id": "exact",
+          "method": "exact",
+          "candidate_limit": 100,
+          "fields": ["identity", "signature", "docstring"]
+        }
+      ],
+      "blocking": {
+        "enabled": false,
+        "match_mode": "any",
+        "minimum_signal_confidence": 0.0,
+        "empty_result": "keep_empty"
+      },
+      "fusion": {"rank_constant": 60},
+      "abstention": {
+        "threshold": 0.8,
+        "calibration_points": [[0.0, 0.0], [1.0, 1.0]],
+        "score_mode": "rrf_consensus_x_channel_score"
+      }
+    },
+    {
+      "profile_id": "word",
+      "config_id": "word_base_v1",
+      "result_limit": 10,
+      "channels": [
+        {
+          "channel_id": "word_tfidf",
+          "method": "word_tfidf",
+          "candidate_limit": 100,
+          "fields": ["identity", "signature", "docstring"],
+          "word_ngram_range": [1, 2]
+        }
+      ],
+      "blocking": {"enabled": false, "match_mode": "any", "empty_result": "keep_empty"},
+      "fusion": {"rank_constant": 60},
+      "abstention": {
+        "threshold": 0.1,
+        "calibration_points": [[0.0, 0.0], [1.0, 1.0]]
+      }
+    },
+    {
+      "profile_id": "char",
+      "config_id": "char_base_v1",
+      "result_limit": 10,
+      "channels": [
+        {
+          "channel_id": "char_tfidf",
+          "method": "char_tfidf",
+          "candidate_limit": 100,
+          "fields": ["identity", "signature", "docstring"],
+          "char_ngram_range": [3, 5]
+        }
+      ],
+      "blocking": {"enabled": false, "match_mode": "any", "empty_result": "keep_empty"},
+      "fusion": {"rank_constant": 60},
+      "abstention": {
+        "threshold": 0.08,
+        "calibration_points": [[0.0, 0.0], [1.0, 1.0]]
+      }
+    },
+    {
+      "profile_id": "fts",
+      "config_id": "fts_base_v1",
+      "result_limit": 10,
+      "channels": [
+        {
+          "channel_id": "sqlite_fts5",
+          "method": "sqlite_fts5",
+          "candidate_limit": 100,
+          "fields": ["identity", "signature", "docstring"]
+        }
+      ],
+      "blocking": {"enabled": false, "match_mode": "any", "empty_result": "keep_empty"},
+      "fusion": {"rank_constant": 60},
+      "abstention": {
+        "threshold": 0.5,
+        "calibration_points": [[0.0, 0.0], [1.0, 1.0]]
+      }
+    },
+    {
+      "profile_id": "hybrid",
+      "config_id": "hybrid_base_v1",
+      "result_limit": 10,
+      "channels": [
+        {
+          "channel_id": "word_tfidf",
+          "method": "word_tfidf",
+          "weight": 1.0,
+          "candidate_limit": 100,
+          "fields": ["identity", "signature", "docstring"],
+          "word_ngram_range": [1, 2]
+        },
+        {
+          "channel_id": "char_tfidf",
+          "method": "char_tfidf",
+          "weight": 1.0,
+          "candidate_limit": 100,
+          "fields": ["identity", "signature", "docstring"],
+          "char_ngram_range": [3, 5]
+        }
+      ],
+      "blocking": {"enabled": false, "match_mode": "any", "empty_result": "keep_empty"},
+      "fusion": {"rank_constant": 60},
+      "abstention": {
+        "threshold": 0.08,
+        "calibration_points": [[0.0, 0.0], [1.0, 1.0]]
+      }
+    }
+  ]
+}

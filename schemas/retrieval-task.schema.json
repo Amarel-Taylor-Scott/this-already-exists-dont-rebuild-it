@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/retrieval-task.schema.json",
+  "title": "Reuse retrieval judgment",
+  "type": "object",
+  "required": ["task_id", "query", "reuse_expected", "acceptable_sets", "hard_negatives", "split"],
+  "properties": {
+    "task_id": {"type": "string", "minLength": 1},
+    "query": {"type": "string", "minLength": 1},
+    "reuse_expected": {"type": "boolean"},
+    "acceptable_sets": {"type": "array", "items": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}},
+    "hard_negatives": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "query_signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["namespace", "value"],
+        "properties": {
+          "namespace": {"type": "string", "minLength": 1},
+          "value": {"type": "string", "minLength": 1},
+          "signal_kind": {"enum": ["label", "blocking_key"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "split": {"enum": ["prompt_holdout", "composition_holdout", "capability_holdout", "temporal_holdout", "version_holdout", "hard_negative_holdout", "no_reuse_holdout"]}
+  },
+  "additionalProperties": false
+}

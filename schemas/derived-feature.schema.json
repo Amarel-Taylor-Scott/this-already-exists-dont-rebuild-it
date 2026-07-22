@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/existing-code-reuse/derived-feature.schema.json",
+  "title": "Append-only derived search feature",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "feature_id",
+    "entity_id",
+    "entity_kind",
+    "feature_kind",
+    "namespace",
+    "value",
+    "generator",
+    "evidence",
+    "confidence",
+    "review_status"
+  ],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "feature_id": {"type": "string", "minLength": 1},
+    "entity_id": {"type": "string", "minLength": 1},
+    "entity_kind": {"type": "string", "minLength": 1},
+    "feature_kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Open namespaced kind such as label, semantic_phrase, port, edge, lsh_bucket, or compatibility_path."
+    },
+    "namespace": {"type": "string", "minLength": 1},
+    "value": {
+      "description": "Any JSON value. Kind-specific projections validate and index the payload."
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "revision", "config_digest"],
+      "properties": {
+        "kind": {"type": "string", "minLength": 1},
+        "id": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "minLength": 1},
+        "model_id": {"type": ["string", "null"]},
+        "model_revision": {"type": ["string", "null"]},
+        "config_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_id", "source_digest"],
+        "properties": {
+          "source_id": {"type": "string", "minLength": 1},
+          "source_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+          "field": {"type": ["string", "null"]},
+          "span": {
+            "type": ["array", "null"],
+            "prefixItems": [
+              {"type": "integer", "minimum": 0},
+              {"type": "integer", "minimum": 0}
+            ],
+            "items": false
+          }
+        }
+      }
+    },
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "review_status": {
+      "enum": ["generated", "reviewed", "verified", "rejected", "superseded"]
+    },
+    "validity": {
+      "type": "object",
+      "description": "Optional exact version, artifact, environment, or policy scope.",
+      "additionalProperties": true
+    }
+  }
+}

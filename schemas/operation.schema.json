@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/operation.schema.json",
+  "title": "Statically observed Python operation",
+  "type": "object",
+  "required": ["operation_id", "package_id", "module", "qualified_name", "kind", "source_digest", "extraction_method", "evidence_level"],
+  "properties": {
+    "operation_id": {"type": "string", "minLength": 1},
+    "package_id": {"type": "string", "minLength": 1},
+    "module": {"type": "string"},
+    "qualified_name": {"type": "string", "minLength": 1},
+    "kind": {"enum": ["function", "async_function", "class", "method", "async_method"]},
+    "signature": {"type": "string"},
+    "docstring": {"type": "string"},
+    "relative_path": {"type": "string"},
+    "line_start": {"type": "integer", "minimum": 1},
+    "line_end": {"type": "integer", "minimum": 1},
+    "source_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "visibility": {"enum": ["public", "private"]},
+    "extraction_method": {"type": "string", "minLength": 1},
+    "evidence_level": {"const": "static_source"}
+  },
+  "additionalProperties": false
+}
+
