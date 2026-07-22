@@ -14,6 +14,14 @@
 - Exact package versions and artifact/source digests appear in execution evidence.
 - Large artifacts, archives, embeddings, indexes, and generated reports stay out of Git.
 - The scale gate is 100–250 → 1,000 → 10,000+, with evidence at every stage.
+- Retrieval/model experimentation uses a versioned conditional registry and bounded screens; the
+  raw Cartesian envelope is not an execution plan.
+- Schedule and stage-configuration IDs are not artifact cache identities. Cacheable artifacts also
+  require frozen corpus/task inputs and resolved model/index digests.
+- Supervised, calibrated, optimized, and historical features declare grouped development,
+  cross-fitted, or temporal lineage; the holdout is never a fitting source.
+- A registry option may be design-only. A manifest reports partial runner coverage, and a valid
+  configuration is not called executable until an adapter emits a receipt.
 
 ## Current evidence
 
@@ -43,4 +51,3 @@ prove accuracy, token savings, small-model superiority, or 10,000-package readin
 - A semantic match is not permission or safety.
 - A generated label is not ground truth.
 - Tokens are not dollars; monetary cost remains null without verified billing.
-

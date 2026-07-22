@@ -28,6 +28,7 @@ packages = ["src/existing_code_reuse"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "configs/retrieval_profiles.json" = "existing_code_reuse/retrieval_profiles.json"
+"configs/experiment_space.json" = "existing_code_reuse/experiment_space.json"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

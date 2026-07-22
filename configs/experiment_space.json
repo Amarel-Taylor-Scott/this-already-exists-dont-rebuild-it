@@ -1,0 +1,957 @@
+{
+  "schema_version": "1",
+  "description": "Conditional prompt-to-Python-capability retrieval, routing, and verification experiment space.",
+  "runner_coverage": {
+    "status": "partial",
+    "full_configuration_materializer": false,
+    "implemented_components": [
+      "bounded conditional scheduler and manifest",
+      "existing exact word character FTS and hybrid retrieval profiles",
+      "deterministic compatibility and verified seed execution",
+      "SentenceTransformers embedding runtime qualification",
+      "Transformers Gemma 4 runtime qualification",
+      "existing-local-server Ollama runtime qualification"
+    ],
+    "design_only_until_an_adapter_and_receipt_writer_are_added": [
+      "Unsloth and llama.cpp runtimes",
+      "most MinHash SimHash ANN service reranker and graph arms",
+      "storage quantization and learned fusion",
+      "full configuration to end-to-end benchmark orchestration"
+    ],
+    "warning": "A valid scheduled configuration is not necessarily connected to an executable adapter."
+  },
+  "resource_tiers": [
+    "cpu_small",
+    "cpu_large",
+    "t4_light",
+    "t4_full",
+    "beyond_t4"
+  ],
+  "dimensions": [
+    {
+      "dimension_id": "catalog_unit",
+      "stage": "corpus",
+      "description": "Smallest independently retrievable catalog entity.",
+      "baseline": "operation",
+      "options": [
+        {"option_id": "package", "resource_tier": "cpu_small"},
+        {"option_id": "module", "resource_tier": "cpu_small"},
+        {"option_id": "operation", "resource_tier": "cpu_small"},
+        {"option_id": "example", "resource_tier": "cpu_large"},
+        {"option_id": "verified_adapter", "resource_tier": "cpu_large"},
+        {"option_id": "hierarchical_package_module_operation", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "evidence_floor",
+      "stage": "corpus",
+      "description": "Minimum evidence level allowed into candidate supply.",
+      "baseline": "static_source",
+      "options": [
+        {"option_id": "metadata", "resource_tier": "cpu_small"},
+        {"option_id": "static_source", "resource_tier": "cpu_small"},
+        {"option_id": "smoke_tested", "resource_tier": "cpu_large"},
+        {"option_id": "contract_tested", "resource_tier": "cpu_large"},
+        {"option_id": "accepted_route", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "training_data_policy",
+      "stage": "corpus",
+      "description": "Lineage rule for supervised, calibrated, optimized, or historical state; the holdout is never a fitting source.",
+      "baseline": "development_only_grouped",
+      "options": [
+        {"option_id": "no_supervised_or_history_state", "resource_tier": "cpu_small"},
+        {"option_id": "development_only_grouped", "resource_tier": "cpu_small"},
+        {"option_id": "cross_fitted_development", "resource_tier": "cpu_large"},
+        {"option_id": "temporal_past_only", "resource_tier": "cpu_large"},
+        {"option_id": "external_frozen_pretrained", "resource_tier": "cpu_small"}
+      ]
+    },
+    {
+      "dimension_id": "representation_set",
+      "stage": "representation",
+      "description": "Observed or derived text planes presented to retrieval channels.",
+      "baseline": "identity_signature_docstring",
+      "options": [
+        {"option_id": "identity_only", "resource_tier": "cpu_small", "fields": ["package", "module", "qualified_name"]},
+        {"option_id": "identity_signature", "resource_tier": "cpu_small", "fields": ["identity", "signature", "type_hints"]},
+        {"option_id": "identity_signature_docstring", "resource_tier": "cpu_small", "fields": ["identity", "signature", "docstring"]},
+        {"option_id": "documentation_examples", "resource_tier": "cpu_large", "fields": ["docstring", "readme", "documentation", "examples"]},
+        {"option_id": "source_structure", "resource_tier": "cpu_large", "fields": ["signature", "ast", "imports", "calls", "source_excerpt"]},
+        {"option_id": "contracts_failures", "resource_tier": "cpu_large", "fields": ["inputs", "outputs", "effects", "exceptions", "limitations", "negative_evidence"]},
+        {"option_id": "problem_solution_views", "resource_tier": "cpu_large", "fields": ["user_problem", "solution_phrase", "workflow_role", "business_purpose"]},
+        {"option_id": "all_separate_fields", "resource_tier": "cpu_large", "fields": ["identity", "signature", "types", "documentation", "examples", "source", "contracts", "failures", "problem_solution"]}
+      ]
+    },
+    {
+      "dimension_id": "chunk_policy",
+      "stage": "representation",
+      "description": "How long evidence is split and re-associated with its entity.",
+      "baseline": "entity_aware",
+      "options": [
+        {"option_id": "single_concatenated", "resource_tier": "cpu_small"},
+        {"option_id": "fixed_256_tokens", "resource_tier": "cpu_small"},
+        {"option_id": "fixed_512_tokens_overlap_64", "resource_tier": "cpu_large"},
+        {"option_id": "entity_aware", "resource_tier": "cpu_small"},
+        {"option_id": "field_aware", "resource_tier": "cpu_large"},
+        {"option_id": "example_aware", "resource_tier": "cpu_large"},
+        {"option_id": "hierarchical_onion", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "text_normalization",
+      "stage": "representation",
+      "description": "Deterministic normalization applied before lexical features and hashing.",
+      "baseline": "identifier_aware",
+      "options": [
+        {"option_id": "raw", "resource_tier": "cpu_small"},
+        {"option_id": "unicode_casefold", "resource_tier": "cpu_small"},
+        {"option_id": "identifier_aware", "resource_tier": "cpu_small"},
+        {"option_id": "identifier_stemmed", "resource_tier": "cpu_small"},
+        {"option_id": "code_tokenized", "resource_tier": "cpu_large"},
+        {"option_id": "dual_raw_and_normalized", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "deterministic_feature_set",
+      "stage": "representation",
+      "description": "Versioned deterministic labels, tags, keys, and structural features.",
+      "baseline": "action_object_io",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "identity_kind", "resource_tier": "cpu_small"},
+        {"option_id": "action_object_io", "resource_tier": "cpu_small"},
+        {"option_id": "signature_types_shapes", "resource_tier": "cpu_large"},
+        {"option_id": "imports_calls_ast", "resource_tier": "cpu_large"},
+        {"option_id": "workflow_domain_effects", "resource_tier": "cpu_large"},
+        {"option_id": "full_deterministic_union", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "nlp_feature_generator",
+      "stage": "representation",
+      "description": "Non-generative NLP lane for keyphrases, topics, intent, tone, and domain facets.",
+      "baseline": "tfidf_keyphrases",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "tfidf_keyphrases", "resource_tier": "cpu_small"},
+        {"option_id": "rake", "resource_tier": "cpu_small"},
+        {"option_id": "yake", "resource_tier": "cpu_small"},
+        {"option_id": "spacy_pos_ner", "resource_tier": "cpu_large"},
+        {"option_id": "sklearn_multilabel_intent", "resource_tier": "cpu_large"},
+        {"option_id": "topic_cluster_labels", "resource_tier": "cpu_large"},
+        {"option_id": "sentiment_tone_risk", "resource_tier": "cpu_large"},
+        {"option_id": "nlp_union", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "description_generator",
+      "stage": "representation",
+      "description": "Source of additional purpose, use-case, problem, solution, and limitation descriptions.",
+      "baseline": "deterministic_template",
+      "options": [
+        {"option_id": "observed_only", "resource_tier": "cpu_small"},
+        {"option_id": "deterministic_template", "resource_tier": "cpu_small"},
+        {"option_id": "extractive_nlp", "resource_tier": "cpu_large"},
+        {"option_id": "llm_single_view_candidate", "resource_tier": "t4_light"},
+        {"option_id": "llm_multi_view_candidate", "resource_tier": "t4_light"},
+        {"option_id": "llm_critique_and_revision_candidate", "resource_tier": "t4_light"}
+      ]
+    },
+    {
+      "dimension_id": "query_facet_extractor",
+      "stage": "query",
+      "description": "Method used to turn a user prompt into searchable action, object, artifact, constraint, domain, and reuse facets.",
+      "baseline": "deterministic_action_object_io",
+      "options": [
+        {"option_id": "raw_query", "resource_tier": "cpu_small"},
+        {"option_id": "deterministic_action_object_io", "resource_tier": "cpu_small"},
+        {"option_id": "taxonomy_rules", "resource_tier": "cpu_small"},
+        {"option_id": "tfidf_logistic_multilabel", "resource_tier": "cpu_large"},
+        {"option_id": "embedding_centroid_intent", "resource_tier": "t4_light"},
+        {"option_id": "small_model_structured_intent", "resource_tier": "t4_light"},
+        {"option_id": "deterministic_then_small_model", "resource_tier": "t4_light"}
+      ]
+    },
+    {
+      "dimension_id": "query_expansion",
+      "stage": "query",
+      "description": "Additional prompt variants used as independently attributable retrieval queries.",
+      "baseline": "none",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "deterministic_synonyms", "resource_tier": "cpu_small"},
+        {"option_id": "taxonomy_ancestors", "resource_tier": "cpu_small"},
+        {"option_id": "historical_success_queries", "resource_tier": "cpu_large"},
+        {"option_id": "pseudo_relevance_feedback", "resource_tier": "cpu_large"},
+        {"option_id": "small_model_paraphrases", "resource_tier": "t4_light"},
+        {"option_id": "hyde_candidate", "resource_tier": "t4_light"}
+      ]
+    },
+    {
+      "dimension_id": "blocking_key_set",
+      "stage": "blocking",
+      "description": "Deterministic keys used to reduce the candidate universe before ranking.",
+      "baseline": "action_object_artifact_union",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "exact_identity", "resource_tier": "cpu_small"},
+        {"option_id": "operation_kind", "resource_tier": "cpu_small"},
+        {"option_id": "action_object_artifact_union", "resource_tier": "cpu_small"},
+        {"option_id": "workflow_domain", "resource_tier": "cpu_small"},
+        {"option_id": "input_output_contract", "resource_tier": "cpu_large"},
+        {"option_id": "package_dependency_family", "resource_tier": "cpu_large"},
+        {"option_id": "multi_key_cascade", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "blocking_logic",
+      "stage": "blocking",
+      "description": "How multiple exact and approximate blocking lanes form candidate supply.",
+      "baseline": "weighted_union",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "strict_intersection", "resource_tier": "cpu_small"},
+        {"option_id": "weighted_union", "resource_tier": "cpu_small"},
+        {"option_id": "minimum_two_matches", "resource_tier": "cpu_small"},
+        {"option_id": "ordered_fallback", "resource_tier": "cpu_small"},
+        {"option_id": "learned_block_probability", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "lsh_family",
+      "stage": "blocking",
+      "description": "Approximate hashing family; each lane is evaluated for recall loss and candidate reduction.",
+      "baseline": "none",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "minhash_threshold", "resource_tier": "cpu_small", "similarity": "jaccard"},
+        {"option_id": "minhash_forest_topk", "resource_tier": "cpu_large", "similarity": "jaccard"},
+        {"option_id": "minhash_ensemble_containment", "resource_tier": "cpu_large", "similarity": "containment"},
+        {"option_id": "weighted_minhash", "resource_tier": "cpu_large", "similarity": "weighted_jaccard"},
+        {"option_id": "simhash_64", "resource_tier": "cpu_small", "similarity": "angular"},
+        {"option_id": "simhash_128", "resource_tier": "cpu_small", "similarity": "angular"},
+        {"option_id": "random_hyperplane_lsh", "resource_tier": "cpu_large", "similarity": "cosine"},
+        {"option_id": "faiss_index_lsh", "resource_tier": "cpu_large", "similarity": "hamming"},
+        {"option_id": "ast_shingle_minhash", "resource_tier": "cpu_large", "similarity": "jaccard"},
+        {"option_id": "call_graph_minhash", "resource_tier": "cpu_large", "similarity": "jaccard"}
+      ]
+    },
+    {
+      "dimension_id": "lsh_resolution",
+      "stage": "blocking",
+      "description": "Shared coarse/medium/fine setting translated into family-specific bands, permutations, bits, or thresholds.",
+      "baseline": "medium",
+      "options": [
+        {"option_id": "coarse", "resource_tier": "cpu_small"},
+        {"option_id": "medium", "resource_tier": "cpu_small"},
+        {"option_id": "fine", "resource_tier": "cpu_large"},
+        {"option_id": "multi_probe", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "lexical_retriever",
+      "stage": "retrieval",
+      "description": "Sparse or exact candidate ranking lane.",
+      "baseline": "bm25_word_char",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "exact_alias", "resource_tier": "cpu_small"},
+        {"option_id": "word_tfidf", "resource_tier": "cpu_small"},
+        {"option_id": "char_tfidf", "resource_tier": "cpu_small"},
+        {"option_id": "sqlite_fts5_bm25", "resource_tier": "cpu_small"},
+        {"option_id": "bm25_word_char", "resource_tier": "cpu_small"},
+        {"option_id": "splade_sparse", "resource_tier": "t4_light"},
+        {"option_id": "bge_m3_sparse", "resource_tier": "t4_light"}
+      ]
+    },
+    {
+      "dimension_id": "dense_model",
+      "stage": "embedding",
+      "description": "Dense embedding model; immutable Hub revision is resolved and recorded at run time.",
+      "baseline": "none",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "all_minilm_l6_v2", "resource_tier": "cpu_small", "model_id": "sentence-transformers/all-MiniLM-L6-v2", "family": "general"},
+        {"option_id": "bge_small_en_v1_5", "resource_tier": "cpu_small", "model_id": "BAAI/bge-small-en-v1.5", "family": "general"},
+        {"option_id": "e5_small_v2", "resource_tier": "cpu_small", "model_id": "intfloat/e5-small-v2", "family": "general"},
+        {"option_id": "nomic_embed_text_v1_5", "resource_tier": "cpu_large", "model_id": "nomic-ai/nomic-embed-text-v1.5", "family": "long_context", "tags": ["matryoshka"]},
+        {"option_id": "modernbert_embed_base", "resource_tier": "cpu_large", "model_id": "nomic-ai/modernbert-embed-base", "family": "general", "tags": ["matryoshka"]},
+        {"option_id": "snowflake_arctic_embed_m_v2", "resource_tier": "cpu_large", "model_id": "Snowflake/snowflake-arctic-embed-m-v2.0", "family": "general", "tags": ["matryoshka"]},
+        {"option_id": "embeddinggemma_300m", "resource_tier": "cpu_large", "estimated_vram_gb": 1.5, "model_id": "google/embeddinggemma-300m", "family": "multilingual", "tags": ["gated", "matryoshka", "asymmetric"]},
+        {"option_id": "qwen3_embedding_0_6b", "resource_tier": "t4_light", "estimated_vram_gb": 2.5, "model_id": "Qwen/Qwen3-Embedding-0.6B", "family": "instruction", "tags": ["matryoshka", "asymmetric"]},
+        {"option_id": "bge_m3_dense", "resource_tier": "t4_light", "estimated_vram_gb": 3.0, "model_id": "BAAI/bge-m3", "family": "multifunction", "tags": ["dense", "sparse", "multivector"]},
+        {"option_id": "jina_v2_base_code", "resource_tier": "cpu_large", "model_id": "jinaai/jina-embeddings-v2-base-code", "family": "code"},
+        {"option_id": "jina_code_embeddings_0_5b", "resource_tier": "t4_light", "estimated_vram_gb": 2.0, "model_id": "jinaai/jina-code-embeddings-0.5b", "family": "code", "tags": ["matryoshka", "asymmetric"]},
+        {"option_id": "coderankembed", "resource_tier": "cpu_large", "model_id": "nomic-ai/CodeRankEmbed", "family": "code"},
+        {"option_id": "unixcoder_base", "resource_tier": "cpu_large", "model_id": "microsoft/unixcoder-base", "family": "code"},
+        {"option_id": "jina_code_embeddings_1_5b", "resource_tier": "t4_full", "estimated_vram_gb": 5.0, "model_id": "jinaai/jina-code-embeddings-1.5b", "family": "code", "tags": ["matryoshka", "asymmetric"]},
+        {"option_id": "jina_embeddings_v4_code", "resource_tier": "beyond_t4", "estimated_vram_gb": 9.0, "model_id": "jinaai/jina-embeddings-v4", "family": "multivector_code", "tags": ["multivector"]},
+        {"option_id": "nomic_embed_code_7b", "resource_tier": "beyond_t4", "estimated_vram_gb": 15.0, "model_id": "nomic-ai/nomic-embed-code", "family": "code"}
+      ]
+    },
+    {
+      "dimension_id": "embedding_input_view",
+      "stage": "embedding",
+      "description": "Fields encoded together or independently by the dense model.",
+      "baseline": "purpose_description",
+      "options": [
+        {"option_id": "identity", "resource_tier": "cpu_small"},
+        {"option_id": "signature_types", "resource_tier": "cpu_small"},
+        {"option_id": "purpose_description", "resource_tier": "cpu_small"},
+        {"option_id": "documentation", "resource_tier": "cpu_large"},
+        {"option_id": "source_excerpt", "resource_tier": "cpu_large"},
+        {"option_id": "examples", "resource_tier": "cpu_large"},
+        {"option_id": "input_output_contract", "resource_tier": "cpu_large"},
+        {"option_id": "problem_solution", "resource_tier": "cpu_large"},
+        {"option_id": "concatenated_all", "resource_tier": "cpu_large"},
+        {"option_id": "separate_field_vectors", "resource_tier": "cpu_large"},
+        {"option_id": "multi_vector_chunks", "resource_tier": "t4_light"}
+      ]
+    },
+    {
+      "dimension_id": "embedding_instruction",
+      "stage": "embedding",
+      "description": "Query/document prefix or instruction policy, always stored with the vector digest.",
+      "baseline": "model_default_asymmetric",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "model_default_asymmetric", "resource_tier": "cpu_small"},
+        {"option_id": "generic_search_query_document", "resource_tier": "cpu_small"},
+        {"option_id": "natural_language_to_code", "resource_tier": "cpu_small"},
+        {"option_id": "capability_retrieval_task", "resource_tier": "cpu_small"},
+        {"option_id": "prompt_optimized_on_validation", "resource_tier": "cpu_large"},
+        {"option_id": "intentionally_swapped_control", "resource_tier": "cpu_small"}
+      ]
+    },
+    {
+      "dimension_id": "embedding_pooling",
+      "stage": "embedding",
+      "description": "Pooling policy; model-default is the reference and alternatives are explicit ablations.",
+      "baseline": "model_default",
+      "options": [
+        {"option_id": "model_default", "resource_tier": "cpu_small"},
+        {"option_id": "mean", "resource_tier": "cpu_small"},
+        {"option_id": "cls", "resource_tier": "cpu_small"},
+        {"option_id": "last_token", "resource_tier": "cpu_small"}
+      ]
+    },
+    {
+      "dimension_id": "embedding_dimension",
+      "stage": "embedding",
+      "description": "Native or model-supported Matryoshka dimension followed by re-normalization.",
+      "baseline": "native",
+      "options": [
+        {"option_id": "native", "resource_tier": "cpu_small"},
+        {"option_id": "matryoshka_512", "resource_tier": "cpu_small"},
+        {"option_id": "matryoshka_256", "resource_tier": "cpu_small"},
+        {"option_id": "matryoshka_128", "resource_tier": "cpu_small"},
+        {"option_id": "matryoshka_64", "resource_tier": "cpu_small"}
+      ]
+    },
+    {
+      "dimension_id": "embedding_precision",
+      "stage": "embedding",
+      "description": "Embedding inference/output precision; finite and nonzero vectors are mandatory.",
+      "baseline": "fp32",
+      "options": [
+        {"option_id": "fp32", "resource_tier": "cpu_small"},
+        {"option_id": "fp16", "resource_tier": "t4_light"},
+        {"option_id": "int8", "resource_tier": "cpu_large"},
+        {"option_id": "uint8", "resource_tier": "cpu_large"},
+        {"option_id": "binary", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "similarity_metric",
+      "stage": "index",
+      "description": "Vector comparison metric; normalization state is recorded independently.",
+      "baseline": "cosine",
+      "options": [
+        {"option_id": "cosine", "resource_tier": "cpu_small"},
+        {"option_id": "dot", "resource_tier": "cpu_small"},
+        {"option_id": "l2", "resource_tier": "cpu_small"},
+        {"option_id": "hamming", "resource_tier": "cpu_small"}
+      ]
+    },
+    {
+      "dimension_id": "vector_index",
+      "stage": "index",
+      "description": "Exact or approximate dense-vector storage/search implementation.",
+      "baseline": "none",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "numpy_exact", "resource_tier": "cpu_small"},
+        {"option_id": "faiss_flat", "resource_tier": "cpu_large"},
+        {"option_id": "faiss_hnsw", "resource_tier": "cpu_large"},
+        {"option_id": "faiss_ivf_flat", "resource_tier": "cpu_large"},
+        {"option_id": "faiss_ivf_pq", "resource_tier": "cpu_large"},
+        {"option_id": "faiss_index_lsh", "resource_tier": "cpu_large"},
+        {"option_id": "qdrant_local", "resource_tier": "cpu_large"},
+        {"option_id": "lancedb_embedded", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "ann_effort",
+      "stage": "index",
+      "description": "Portable low/medium/high search effort translated into index-specific parameters.",
+      "baseline": "exact_or_high_recall",
+      "options": [
+        {"option_id": "low_latency", "resource_tier": "cpu_small"},
+        {"option_id": "balanced", "resource_tier": "cpu_small"},
+        {"option_id": "exact_or_high_recall", "resource_tier": "cpu_small"}
+      ]
+    },
+    {
+      "dimension_id": "fusion_method",
+      "stage": "retrieval",
+      "description": "Method used to combine independently attributable exact, sparse, dense, LSH, and graph ranks.",
+      "baseline": "rrf_60",
+      "options": [
+        {"option_id": "single_best_lane", "resource_tier": "cpu_small"},
+        {"option_id": "union_max", "resource_tier": "cpu_small"},
+        {"option_id": "rrf_10", "resource_tier": "cpu_small"},
+        {"option_id": "rrf_60", "resource_tier": "cpu_small"},
+        {"option_id": "rrf_100", "resource_tier": "cpu_small"},
+        {"option_id": "normalized_weighted_sum", "resource_tier": "cpu_large"},
+        {"option_id": "distribution_based_score_fusion", "resource_tier": "cpu_large"},
+        {"option_id": "validation_learned_linear", "resource_tier": "cpu_large"},
+        {"option_id": "learning_to_rank", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "graph_edge_set",
+      "stage": "retrieval",
+      "description": "Versioned typed edges eligible for expansion; unknown compatibility never becomes a positive edge.",
+      "baseline": "none",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "hierarchy", "resource_tier": "cpu_small"},
+        {"option_id": "imports_calls", "resource_tier": "cpu_large"},
+        {"option_id": "examples_co_usage", "resource_tier": "cpu_large"},
+        {"option_id": "input_output_compatibility", "resource_tier": "cpu_large"},
+        {"option_id": "adapter_paths", "resource_tier": "cpu_large"},
+        {"option_id": "accepted_route_history", "resource_tier": "cpu_large"},
+        {"option_id": "typed_edge_union", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "graph_expansion",
+      "stage": "retrieval",
+      "description": "Graph search applied after initial candidate retrieval.",
+      "baseline": "none",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "typed_one_hop", "resource_tier": "cpu_small"},
+        {"option_id": "typed_two_hop", "resource_tier": "cpu_large"},
+        {"option_id": "bounded_path_search", "resource_tier": "cpu_large"},
+        {"option_id": "personalized_pagerank", "resource_tier": "cpu_large"},
+        {"option_id": "bidirectional_contract_search", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "reranker",
+      "stage": "rerank",
+      "description": "Optional shortlist reranker, evaluated at frozen candidate depths.",
+      "baseline": "none",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "deterministic_field_match", "resource_tier": "cpu_small"},
+        {"option_id": "cross_encoder_minilm", "resource_tier": "cpu_large", "model_id": "cross-encoder/ms-marco-MiniLM-L6-v2"},
+        {"option_id": "bge_reranker_base", "resource_tier": "t4_light", "model_id": "BAAI/bge-reranker-base"},
+        {"option_id": "qwen3_reranker_0_6b", "resource_tier": "t4_light", "model_id": "Qwen/Qwen3-Reranker-0.6B"},
+        {"option_id": "small_llm_pairwise", "resource_tier": "t4_light"},
+        {"option_id": "small_llm_listwise", "resource_tier": "t4_light"}
+      ]
+    },
+    {
+      "dimension_id": "rerank_depth",
+      "stage": "rerank",
+      "description": "Number of candidates scored by the optional reranker.",
+      "baseline": "20",
+      "options": [
+        {"option_id": "5", "resource_tier": "cpu_small"},
+        {"option_id": "10", "resource_tier": "cpu_small"},
+        {"option_id": "20", "resource_tier": "cpu_small"},
+        {"option_id": "50", "resource_tier": "cpu_large"},
+        {"option_id": "100", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "compatibility_gate",
+      "stage": "compatibility",
+      "description": "Placement and strictness of version, platform, policy, resource, and named-port checks.",
+      "baseline": "hard_postfilter",
+      "options": [
+        {"option_id": "none_control", "resource_tier": "cpu_small"},
+        {"option_id": "hard_prefilter", "resource_tier": "cpu_large"},
+        {"option_id": "soft_ranking_feature", "resource_tier": "cpu_large"},
+        {"option_id": "hard_postfilter", "resource_tier": "cpu_small"},
+        {"option_id": "pre_and_post_fail_closed", "resource_tier": "cpu_large"},
+        {"option_id": "adapter_aware_path_gate", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "abstention_policy",
+      "stage": "compatibility",
+      "description": "Calibrated decision between reuse, no reuse, prohibited, unknown, and insufficient evidence.",
+      "baseline": "heldout_calibrated",
+      "options": [
+        {"option_id": "never_abstain_control", "resource_tier": "cpu_small"},
+        {"option_id": "fixed_threshold", "resource_tier": "cpu_small"},
+        {"option_id": "heldout_calibrated", "resource_tier": "cpu_small"},
+        {"option_id": "conformal_risk_control", "resource_tier": "cpu_large"},
+        {"option_id": "cost_sensitive_reuse_classifier", "resource_tier": "cpu_large"}
+      ]
+    },
+    {
+      "dimension_id": "enrichment_model",
+      "stage": "representation",
+      "description": "Optional model used only to propose reviewable derived descriptions, labels, edges, or examples.",
+      "baseline": "none",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "functiongemma_270m", "resource_tier": "t4_light", "model_id": "google/functiongemma-270m-it"},
+        {"option_id": "qwen3_5_0_8b", "resource_tier": "t4_light", "model_id": "Qwen/Qwen3.5-0.8B"},
+        {"option_id": "qwen2_5_coder_1_5b", "resource_tier": "t4_light", "model_id": "Qwen/Qwen2.5-Coder-1.5B-Instruct"},
+        {"option_id": "gemma4_e2b", "resource_tier": "t4_full", "estimated_vram_gb": 11.4, "model_id": "google/gemma-4-E2B-it", "tags": ["gated"]},
+        {"option_id": "phi4_mini", "resource_tier": "t4_full", "model_id": "microsoft/Phi-4-mini-instruct"}
+      ]
+    },
+    {
+      "dimension_id": "planner_model",
+      "stage": "rerank",
+      "description": "Model allowed to select only retrieved operation and adapter IDs inside a constrained route structure.",
+      "baseline": "deterministic",
+      "options": [
+        {"option_id": "deterministic", "resource_tier": "cpu_small"},
+        {"option_id": "functiongemma_270m", "resource_tier": "t4_light", "model_id": "google/functiongemma-270m-it"},
+        {"option_id": "qwen3_5_0_8b", "resource_tier": "t4_light", "model_id": "Qwen/Qwen3.5-0.8B"},
+        {"option_id": "qwen2_5_coder_1_5b", "resource_tier": "t4_light", "model_id": "Qwen/Qwen2.5-Coder-1.5B-Instruct"},
+        {"option_id": "smollm3_3b", "resource_tier": "t4_full", "model_id": "HuggingFaceTB/SmolLM3-3B"},
+        {"option_id": "gemma4_e2b", "resource_tier": "t4_full", "estimated_vram_gb": 11.4, "model_id": "google/gemma-4-E2B-it", "tags": ["gated"]},
+        {"option_id": "gemma4_e4b_quantized", "resource_tier": "t4_full", "estimated_vram_gb": 4.5, "model_id": "google/gemma-4-E4B-it", "tags": ["gated", "quantized_only"]},
+        {"option_id": "phi4_mini", "resource_tier": "t4_full", "model_id": "microsoft/Phi-4-mini-instruct"},
+        {"option_id": "granite4_micro", "resource_tier": "t4_full", "model_id": "ibm-granite/granite-4.0-micro"}
+      ]
+    },
+    {
+      "dimension_id": "llm_runtime",
+      "stage": "representation",
+      "description": "Runtime is an independent factor so backend differences are not credited to the model or retriever.",
+      "baseline": "none",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "transformers", "resource_tier": "t4_light"},
+        {"option_id": "unsloth", "resource_tier": "t4_full"},
+        {"option_id": "llama_cpp_server", "resource_tier": "t4_full"},
+        {"option_id": "ollama_server", "resource_tier": "t4_full"}
+      ]
+    },
+    {
+      "dimension_id": "llm_quantization",
+      "stage": "representation",
+      "description": "Weight/runtime format; actual artifact bytes and peak VRAM are measured rather than inferred.",
+      "baseline": "none",
+      "options": [
+        {"option_id": "none", "resource_tier": "cpu_small"},
+        {"option_id": "fp16", "resource_tier": "t4_light"},
+        {"option_id": "bitsandbytes_int8", "resource_tier": "t4_light"},
+        {"option_id": "bitsandbytes_nf4", "resource_tier": "t4_light"},
+        {"option_id": "gguf_q8", "resource_tier": "t4_full"},
+        {"option_id": "gguf_q6", "resource_tier": "t4_full"},
+        {"option_id": "gguf_q5", "resource_tier": "t4_full"},
+        {"option_id": "gguf_q4", "resource_tier": "t4_full"}
+      ]
+    },
+    {
+      "dimension_id": "thinking_mode",
+      "stage": "representation",
+      "description": "Thinking is varied explicitly and never allowed to silently change token budgets.",
+      "baseline": "off",
+      "options": [
+        {"option_id": "off", "resource_tier": "cpu_small"},
+        {"option_id": "on", "resource_tier": "t4_light"}
+      ]
+    },
+    {
+      "dimension_id": "planner_context_budget",
+      "stage": "representation",
+      "description": "Bounded candidate context used for planning; advertised maximum model context is not assumed feasible.",
+      "baseline": "4096",
+      "options": [
+        {"option_id": "2048", "resource_tier": "cpu_small"},
+        {"option_id": "4096", "resource_tier": "cpu_small"},
+        {"option_id": "8192", "resource_tier": "t4_full"},
+        {"option_id": "16384", "resource_tier": "beyond_t4"}
+      ]
+    },
+    {
+      "dimension_id": "planner_candidate_count",
+      "stage": "planning",
+      "description": "Number of allowlisted candidates presented to the constrained planner.",
+      "baseline": "16",
+      "options": [
+        {"option_id": "4", "resource_tier": "cpu_small"},
+        {"option_id": "8", "resource_tier": "cpu_small"},
+        {"option_id": "16", "resource_tier": "cpu_small"},
+        {"option_id": "32", "resource_tier": "t4_light"},
+        {"option_id": "64", "resource_tier": "t4_full"}
+      ]
+    },
+    {
+      "dimension_id": "structured_output",
+      "stage": "planning",
+      "description": "How a model proposal is constrained before deterministic validation.",
+      "baseline": "json_schema_postvalidate",
+      "options": [
+        {"option_id": "json_schema_postvalidate", "resource_tier": "cpu_small"},
+        {"option_id": "grammar_constrained_json", "resource_tier": "t4_light"},
+        {"option_id": "function_call", "resource_tier": "t4_light"},
+        {"option_id": "freeform_then_repair_control", "resource_tier": "t4_light"}
+      ]
+    },
+    {
+      "dimension_id": "verification_depth",
+      "stage": "verification",
+      "description": "Strongest required verification gate for an accepted result.",
+      "baseline": "route_and_independent_acceptance",
+      "options": [
+        {"option_id": "syntax_only_control", "resource_tier": "cpu_small"},
+        {"option_id": "import_and_smoke", "resource_tier": "cpu_large"},
+        {"option_id": "contract_tests", "resource_tier": "cpu_large"},
+        {"option_id": "route_execution", "resource_tier": "cpu_large"},
+        {"option_id": "route_and_independent_acceptance", "resource_tier": "cpu_small"},
+        {"option_id": "clean_replay_and_contribution_ablation", "resource_tier": "cpu_large"}
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "constraint_id": "no_dense_means_no_vector_index",
+      "when": {"dense_model": ["none"]},
+      "require": {
+        "vector_index": ["none"],
+        "embedding_input_view": ["purpose_description"],
+        "embedding_instruction": ["model_default_asymmetric"],
+        "embedding_pooling": ["model_default"],
+        "embedding_dimension": ["native"],
+        "embedding_precision": ["fp32"],
+        "similarity_metric": ["cosine"],
+        "ann_effort": ["exact_or_high_recall"],
+        "lexical_retriever": ["exact_alias", "word_tfidf", "char_tfidf", "sqlite_fts5_bm25", "bm25_word_char", "splade_sparse", "bge_m3_sparse"]
+      },
+      "reason": "without a dense lane, embedding/index factors are neutral and a lexical lane supplies candidates"
+    },
+    {
+      "constraint_id": "no_vector_index_means_no_dense_model",
+      "when": {"vector_index": ["none"]},
+      "require": {"dense_model": ["none"]},
+      "reason": "dense vectors must be queried through a declared exact or approximate index"
+    },
+    {
+      "constraint_id": "embeddinggemma_fp32_on_kaggle_reference",
+      "when": {"dense_model": ["embeddinggemma_300m"]},
+      "require": {"embedding_precision": ["fp32"]},
+      "reason": "the T4/P100 qualification lane uses EmbeddingGemma FP32 and rejects non-finite vectors"
+    },
+    {
+      "constraint_id": "matryoshka_512_supported_models",
+      "when": {"embedding_dimension": ["matryoshka_512"]},
+      "require": {"dense_model": ["embeddinggemma_300m", "qwen3_embedding_0_6b", "jina_code_embeddings_0_5b", "jina_code_embeddings_1_5b"]},
+      "reason": "dimension truncation is valid only for a model that explicitly supports this Matryoshka size"
+    },
+    {
+      "constraint_id": "matryoshka_256_supported_models",
+      "when": {"embedding_dimension": ["matryoshka_256"]},
+      "require": {"dense_model": ["embeddinggemma_300m", "qwen3_embedding_0_6b", "nomic_embed_text_v1_5", "modernbert_embed_base", "snowflake_arctic_embed_m_v2", "jina_code_embeddings_0_5b", "jina_code_embeddings_1_5b"]},
+      "reason": "dimension truncation is valid only for a model that explicitly supports this Matryoshka size"
+    },
+    {
+      "constraint_id": "matryoshka_128_supported_models",
+      "when": {"embedding_dimension": ["matryoshka_128"]},
+      "require": {"dense_model": ["embeddinggemma_300m", "qwen3_embedding_0_6b", "nomic_embed_text_v1_5", "jina_code_embeddings_0_5b", "jina_code_embeddings_1_5b"]},
+      "reason": "dimension truncation is valid only for a model that explicitly supports this Matryoshka size"
+    },
+    {
+      "constraint_id": "matryoshka_64_supported_models",
+      "when": {"embedding_dimension": ["matryoshka_64"]},
+      "require": {"dense_model": ["qwen3_embedding_0_6b", "jina_code_embeddings_0_5b"]},
+      "reason": "64 dimensions are kept only for explicitly registered Matryoshka models"
+    },
+    {
+      "constraint_id": "hamming_requires_binary_or_lsh",
+      "when": {"similarity_metric": ["hamming"]},
+      "require": {"embedding_precision": ["binary"], "vector_index": ["faiss_index_lsh"]},
+      "reason": "Hamming comparison is defined here only for binary codes in the Faiss LSH arm"
+    },
+    {
+      "constraint_id": "binary_requires_hamming",
+      "when": {"embedding_precision": ["binary"]},
+      "require": {"similarity_metric": ["hamming"]},
+      "reason": "binary vector output is evaluated with Hamming distance"
+    },
+    {
+      "constraint_id": "graph_expansion_requires_edges",
+      "when": {"graph_expansion": ["typed_one_hop", "typed_two_hop", "bounded_path_search", "personalized_pagerank", "bidirectional_contract_search"]},
+      "require": {"graph_edge_set": ["hierarchy", "imports_calls", "examples_co_usage", "input_output_compatibility", "adapter_paths", "accepted_route_history", "typed_edge_union"]},
+      "reason": "graph expansion cannot run without a declared edge supply"
+    },
+    {
+      "constraint_id": "no_edges_means_no_graph_expansion",
+      "when": {"graph_edge_set": ["none"]},
+      "require": {"graph_expansion": ["none"]},
+      "reason": "there is no graph to expand"
+    },
+    {
+      "constraint_id": "no_llm_runtime_is_deterministic",
+      "when": {"llm_runtime": ["none"]},
+      "require": {"enrichment_model": ["none"], "planner_model": ["deterministic"], "llm_quantization": ["none"], "thinking_mode": ["off"]},
+      "reason": "model-backed features and planning require a measured runtime"
+    },
+    {
+      "constraint_id": "fully_deterministic_configuration_has_no_runtime",
+      "when": {"enrichment_model": ["none"], "planner_model": ["deterministic"]},
+      "require": {"llm_runtime": ["none"], "llm_quantization": ["none"], "thinking_mode": ["off"], "planner_context_budget": ["4096"]},
+      "reason": "a dormant model server is not part of a deterministic arm"
+    },
+    {
+      "constraint_id": "transformers_quantization_formats",
+      "when": {"llm_runtime": ["transformers"]},
+      "require": {"llm_quantization": ["fp16", "bitsandbytes_int8", "bitsandbytes_nf4"]},
+      "reason": "GGUF is evaluated through a GGUF runtime, not the Transformers reference"
+    },
+    {
+      "constraint_id": "unsloth_quantization_formats",
+      "when": {"llm_runtime": ["unsloth"]},
+      "require": {"llm_quantization": ["fp16", "bitsandbytes_nf4"]},
+      "reason": "the initial Unsloth qualification lane is limited to FP16 and NF4"
+    },
+    {
+      "constraint_id": "llama_cpp_uses_gguf",
+      "when": {"llm_runtime": ["llama_cpp_server"]},
+      "require": {"llm_quantization": ["gguf_q8", "gguf_q6", "gguf_q5", "gguf_q4"]},
+      "reason": "llama.cpp server trials use an exact recorded GGUF artifact"
+    },
+    {
+      "constraint_id": "ollama_uses_gguf",
+      "when": {"llm_runtime": ["ollama_server"]},
+      "require": {"llm_quantization": ["gguf_q8", "gguf_q6", "gguf_q5", "gguf_q4"]},
+      "reason": "Ollama trials use an exact recorded local model artifact"
+    },
+    {
+      "constraint_id": "gemma4_e4b_is_quantized",
+      "when": {"planner_model": ["gemma4_e4b_quantized"]},
+      "require": {"llm_quantization": ["bitsandbytes_nf4", "gguf_q8", "gguf_q6", "gguf_q5", "gguf_q4"]},
+      "reason": "Gemma 4 E4B is qualified on a 16 GB Kaggle GPU only through a quantized arm"
+    },
+    {
+      "constraint_id": "llm_descriptions_need_enrichment_model",
+      "when": {"description_generator": ["llm_single_view_candidate", "llm_multi_view_candidate", "llm_critique_and_revision_candidate"]},
+      "require": {"enrichment_model": ["functiongemma_270m", "qwen3_5_0_8b", "qwen2_5_coder_1_5b", "gemma4_e2b", "phi4_mini"]},
+      "reason": "LLM-derived descriptions remain candidates and name the model that generated them"
+    },
+    {
+      "constraint_id": "non_llm_descriptions_do_not_load_enrichment_model",
+      "when": {
+        "description_generator": ["observed_only", "deterministic_template", "extractive_nlp"],
+        "query_facet_extractor": ["raw_query", "deterministic_action_object_io", "taxonomy_rules", "tfidf_logistic_multilabel", "embedding_centroid_intent"],
+        "query_expansion": ["none", "deterministic_synonyms", "taxonomy_ancestors", "historical_success_queries", "pseudo_relevance_feedback"]
+      },
+      "require": {"enrichment_model": ["none"]},
+      "reason": "an enrichment model is not loaded when no description or query feature uses it"
+    },
+    {
+      "constraint_id": "llm_query_facets_need_model_runtime",
+      "when": {"query_facet_extractor": ["small_model_structured_intent", "deterministic_then_small_model"]},
+      "require": {"enrichment_model": ["functiongemma_270m", "qwen3_5_0_8b", "qwen2_5_coder_1_5b", "gemma4_e2b", "phi4_mini"]},
+      "reason": "model-derived query facets name their generator and runtime"
+    },
+    {
+      "constraint_id": "llm_query_expansion_needs_model_runtime",
+      "when": {"query_expansion": ["small_model_paraphrases", "hyde_candidate"]},
+      "require": {"enrichment_model": ["functiongemma_270m", "qwen3_5_0_8b", "qwen2_5_coder_1_5b", "gemma4_e2b", "phi4_mini"]},
+      "reason": "model-derived query expansions name their generator and runtime"
+    },
+    {
+      "constraint_id": "small_llm_reranker_needs_planner_model",
+      "when": {"reranker": ["small_llm_pairwise", "small_llm_listwise"]},
+      "require": {"planner_model": ["functiongemma_270m", "qwen3_5_0_8b", "qwen2_5_coder_1_5b", "smollm3_3b", "gemma4_e2b", "gemma4_e4b_quantized", "phi4_mini", "granite4_micro"]},
+      "reason": "an LLM reranker must name and meter its model"
+    },
+    {
+      "constraint_id": "deterministic_planner_uses_postvalidation",
+      "when": {"planner_model": ["deterministic"]},
+      "require": {"structured_output": ["json_schema_postvalidate"]},
+      "reason": "grammar, function-call, and free-form output controls are model-only factors"
+    },
+    {
+      "constraint_id": "no_lsh_uses_neutral_resolution",
+      "when": {"lsh_family": ["none"]},
+      "require": {"lsh_resolution": ["medium"]},
+      "reason": "LSH resolution is neutral when no LSH family is selected"
+    },
+    {
+      "constraint_id": "no_reranker_uses_neutral_depth",
+      "when": {"reranker": ["none"]},
+      "require": {"rerank_depth": ["20"]},
+      "reason": "rerank depth is neutral when no reranker is selected"
+    },
+    {
+      "constraint_id": "no_blocking_supply_disables_blocking_logic",
+      "when": {"blocking_key_set": ["none"], "lsh_family": ["none"]},
+      "require": {"blocking_logic": ["none"]},
+      "reason": "blocking logic has no candidate supply when exact and approximate blockers are absent"
+    },
+    {
+      "constraint_id": "faiss_lsh_index_uses_binary_hamming",
+      "when": {"vector_index": ["faiss_index_lsh"]},
+      "require": {"embedding_precision": ["binary"], "similarity_metric": ["hamming"]},
+      "reason": "the Faiss IndexLSH arm compares binary codes with Hamming distance"
+    },
+    {
+      "constraint_id": "exact_indexes_use_neutral_ann_effort",
+      "when": {"vector_index": ["none", "numpy_exact", "faiss_flat"]},
+      "require": {"ann_effort": ["exact_or_high_recall"]},
+      "reason": "ANN effort is neutral for exhaustive or absent vector indexes"
+    },
+    {
+      "constraint_id": "no_supervised_state_disables_fitted_or_historical_features",
+      "when": {"training_data_policy": ["no_supervised_or_history_state"]},
+      "require": {
+        "nlp_feature_generator": ["none", "tfidf_keyphrases", "rake", "yake", "spacy_pos_ner", "topic_cluster_labels", "sentiment_tone_risk"],
+        "query_facet_extractor": ["raw_query", "deterministic_action_object_io", "taxonomy_rules", "small_model_structured_intent", "deterministic_then_small_model"],
+        "query_expansion": ["none", "deterministic_synonyms", "taxonomy_ancestors", "pseudo_relevance_feedback", "small_model_paraphrases", "hyde_candidate"],
+        "blocking_logic": ["none", "strict_intersection", "weighted_union", "minimum_two_matches", "ordered_fallback"],
+        "embedding_instruction": ["none", "model_default_asymmetric", "generic_search_query_document", "natural_language_to_code", "capability_retrieval_task", "intentionally_swapped_control"],
+        "fusion_method": ["single_best_lane", "union_max", "rrf_10", "rrf_60", "rrf_100", "normalized_weighted_sum", "distribution_based_score_fusion"],
+        "graph_edge_set": ["none", "hierarchy", "imports_calls", "examples_co_usage", "input_output_compatibility", "adapter_paths", "typed_edge_union"],
+        "abstention_policy": ["never_abstain_control", "fixed_threshold"]
+      },
+      "reason": "task-fitted, calibrated, optimized, and historical state must name an allowed development lineage"
+    },
+    {
+      "constraint_id": "historical_queries_are_temporal",
+      "when": {"query_expansion": ["historical_success_queries"]},
+      "require": {"training_data_policy": ["temporal_past_only"]},
+      "reason": "successful prior queries must precede the evaluated request"
+    },
+    {
+      "constraint_id": "accepted_route_history_is_temporal",
+      "when": {"graph_edge_set": ["accepted_route_history"]},
+      "require": {"training_data_policy": ["temporal_past_only"]},
+      "reason": "accepted-route edges must precede the evaluated request"
+    },
+    {
+      "constraint_id": "supervised_nlp_uses_development_lineage",
+      "when": {"nlp_feature_generator": ["sklearn_multilabel_intent", "nlp_union"]},
+      "require": {"training_data_policy": ["development_only_grouped", "cross_fitted_development", "temporal_past_only"]},
+      "reason": "supervised labels must never be fitted on the holdout"
+    },
+    {
+      "constraint_id": "supervised_query_facets_use_development_lineage",
+      "when": {"query_facet_extractor": ["tfidf_logistic_multilabel", "embedding_centroid_intent"]},
+      "require": {"training_data_policy": ["development_only_grouped", "cross_fitted_development", "temporal_past_only"]},
+      "reason": "query intent fitting must never use the holdout"
+    },
+    {
+      "constraint_id": "learned_blocking_uses_development_lineage",
+      "when": {"blocking_logic": ["learned_block_probability"]},
+      "require": {"training_data_policy": ["development_only_grouped", "cross_fitted_development", "temporal_past_only"]},
+      "reason": "learned blocking must never use the holdout"
+    },
+    {
+      "constraint_id": "optimized_prompts_use_development_lineage",
+      "when": {"embedding_instruction": ["prompt_optimized_on_validation"]},
+      "require": {"training_data_policy": ["development_only_grouped", "cross_fitted_development", "temporal_past_only"]},
+      "reason": "prompt optimization must never use the holdout"
+    },
+    {
+      "constraint_id": "learned_fusion_uses_development_lineage",
+      "when": {"fusion_method": ["validation_learned_linear", "learning_to_rank"]},
+      "require": {"training_data_policy": ["development_only_grouped", "cross_fitted_development", "temporal_past_only"]},
+      "reason": "fusion fitting must never use the holdout"
+    },
+    {
+      "constraint_id": "calibrated_abstention_uses_development_lineage",
+      "when": {"abstention_policy": ["heldout_calibrated", "conformal_risk_control", "cost_sensitive_reuse_classifier"]},
+      "require": {"training_data_policy": ["development_only_grouped", "cross_fitted_development", "temporal_past_only"]},
+      "reason": "abstention fitting and calibration must never use the holdout"
+    }
+  ],
+  "budgets": [
+    {
+      "budget_id": "smoke",
+      "task_limit": 12,
+      "package_limit": 20,
+      "query_repeats": 1,
+      "learned_seeds": 1,
+      "route_execution_limit": 4
+    },
+    {
+      "budget_id": "screen",
+      "task_limit": 75,
+      "package_limit": 100,
+      "query_repeats": 2,
+      "learned_seeds": 1,
+      "route_execution_limit": 20
+    },
+    {
+      "budget_id": "confirm",
+      "task_limit": 300,
+      "package_limit": 250,
+      "query_repeats": 3,
+      "learned_seeds": 3,
+      "route_execution_limit": 100
+    },
+    {
+      "budget_id": "holdout",
+      "task_limit": 500,
+      "package_limit": 250,
+      "query_repeats": 5,
+      "learned_seeds": 5,
+      "route_execution_limit": 250
+    }
+  ],
+  "named_configurations": {
+    "deterministic_lexical": {},
+    "minilm_hybrid": {
+      "dense_model": "all_minilm_l6_v2",
+      "vector_index": "numpy_exact"
+    },
+    "embeddinggemma_hybrid": {
+      "dense_model": "embeddinggemma_300m",
+      "vector_index": "faiss_flat",
+      "embedding_precision": "fp32"
+    },
+    "qwen_code_hybrid": {
+      "dense_model": "qwen3_embedding_0_6b",
+      "vector_index": "faiss_hnsw",
+      "embedding_precision": "fp16",
+      "embedding_input_view": "problem_solution",
+      "embedding_instruction": "natural_language_to_code"
+    },
+    "gemma4_e2b_transformers_planner": {
+      "dense_model": "all_minilm_l6_v2",
+      "vector_index": "numpy_exact",
+      "planner_model": "gemma4_e2b",
+      "llm_runtime": "transformers",
+      "llm_quantization": "fp16"
+    },
+    "gemma4_e2b_ollama_planner": {
+      "dense_model": "all_minilm_l6_v2",
+      "vector_index": "numpy_exact",
+      "planner_model": "gemma4_e2b",
+      "llm_runtime": "ollama_server",
+      "llm_quantization": "gguf_q4",
+      "structured_output": "grammar_constrained_json"
+    },
+    "functiongemma_transformers_router": {
+      "planner_model": "functiongemma_270m",
+      "llm_runtime": "transformers",
+      "llm_quantization": "fp16",
+      "structured_output": "function_call"
+    }
+  }
+}

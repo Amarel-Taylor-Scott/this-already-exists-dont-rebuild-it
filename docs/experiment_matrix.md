@@ -1,5 +1,27 @@
 # Experiment and ablation matrix
 
+## Versioned conditional configuration
+
+The declared experimental option envelope is [`configs/experiment_space.json`](../configs/experiment_space.json):
+41 dimensions across corpus, representation, query, blocking, retrieval, embedding, index,
+reranking, compatibility, planning, runtime, and verification, with 38 constraints that reject
+nonsensical combinations. Generate a bounded schedule with:
+
+```bash
+uv run reuse-code design-experiments \
+  --strategy mixed_screen \
+  --max-experiments 200 \
+  --max-resource-tier t4_full \
+  --budget smoke
+```
+
+The raw Cartesian envelope is approximately 2.10 × 10^32 configurations, so it is not an
+execution plan. Screen in stages, promote survivors under increasing budgets, and reserve the
+holdout for selected configurations. A generated manifest is scheduled work, not measured
+evidence. The [conditional experiment-system guide](retrieval_model_experiment_system.md) documents
+all dimensions, constraints, Kaggle T4/model-runtime qualification, storage and LSH choices, and
+receipt requirements.
+
 ## Primary outcomes
 
 Keep separate leaderboards. Do not hide tradeoffs in one arbitrary score.
@@ -119,4 +141,3 @@ must remain in one split group.
 - report by domain, popularity decile, evidence level, artifact/platform type, and documentation/type
   coverage;
 - retain failed and unfavorable runs as data.
-

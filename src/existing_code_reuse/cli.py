@@ -17,6 +17,12 @@ from typing import Any, Sequence
 from .benchmark import BenchmarkTask, EvaluationConfig, run_offline_benchmark
 from .capabilities import seed_capabilities
 from .execution import execute_route, plan_route, receipt_json
+from .experiments import (
+    design_configurations,
+    design_manifest,
+    load_experiment_space,
+    schedule_first_round,
+)
 from .ingest import IngestConfig, ingest_installed_distributions
 from .models import normalize_project_name
 from .retrieval import (
@@ -361,6 +367,69 @@ def _run_seed(args: argparse.Namespace) -> int:
     return 0 if summary["all_passed"] else 1
 
 
+def _design_experiments(args: argparse.Namespace) -> int:
+    """Create a bounded conditional sweep manifest without claiming measured results."""
+
+    if args.space:
+        space = load_experiment_space(args.space)
+    else:
+        checkout_space = Path("configs/experiment_space.json")
+        source_space = Path(__file__).resolve().parents[2] / "configs/experiment_space.json"
+        if checkout_space.is_file():
+            space = load_experiment_space(checkout_space)
+        elif source_space.is_file():
+            space = load_experiment_space(source_space)
+        else:
+            packaged_space = files("existing_code_reuse").joinpath("experiment_space.json")
+            with as_file(packaged_space) as materialized_space:
+                space = load_experiment_space(materialized_space)
+    configurations = design_configurations(
+        space,
+        strategy=args.strategy,
+        max_experiments=args.max_experiments,
+        seed=args.seed,
+        max_resource_tier=args.max_resource_tier,
+    )
+    if not configurations:
+        raise ValueError("the selected strategy/resource tier produced no valid configurations")
+    if args.budget not in space.budget_by_id:
+        available = ", ".join(sorted(space.budget_by_id))
+        raise ValueError(f"unknown budget {args.budget!r}; available: {available}")
+    trials = schedule_first_round(
+        configurations,
+        budget=space.budget_by_id[args.budget],
+        registry_digest=space.registry_digest,
+    )
+    manifest = design_manifest(
+        space,
+        configurations,
+        trials,
+        strategy=args.strategy,
+        seed=args.seed,
+        max_resource_tier=args.max_resource_tier,
+        requested_configuration_count=args.max_experiments,
+    )
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _json_print(
+        {
+            "status": "scheduled",
+            "output": str(output),
+            "registry_digest": space.registry_digest,
+            "dimension_count": len(space.dimensions),
+            "constraint_count": len(space.constraints),
+            "raw_cartesian_size": space.raw_cartesian_size,
+            "requested_configuration_count": args.max_experiments,
+            "scheduled_configuration_count": len(configurations),
+            "underfilled": len(configurations) < args.max_experiments,
+            "budget": args.budget,
+            "warning": manifest["warning"],
+        }
+    )
+    return 0
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="reuse-code",
@@ -420,6 +489,41 @@ def _parser() -> argparse.ArgumentParser:
     run_seed.add_argument("--project-root", default=".")
     run_seed.add_argument("--output-dir", default="reports/live/receipts")
     run_seed.set_defaults(handler=_run_seed)
+
+    design = subparsers.add_parser(
+        "design-experiments",
+        help="Generate a bounded conditional retrieval/model sweep manifest.",
+    )
+    design.add_argument(
+        "--space",
+        help="Override the bundled versioned conditional experiment-space JSON document.",
+    )
+    design.add_argument(
+        "--strategy",
+        choices=(
+            "baseline",
+            "one_factor",
+            "pairwise_screen",
+            "random_valid",
+            "mixed_screen",
+            "full_factorial",
+        ),
+        default="mixed_screen",
+    )
+    design.add_argument("--max-experiments", type=int, default=200)
+    design.add_argument("--seed", type=int, default=17)
+    design.add_argument(
+        "--max-resource-tier",
+        default="t4_full",
+        help="Maximum tier declared by the selected registry (default: t4_full).",
+    )
+    design.add_argument(
+        "--budget",
+        default="smoke",
+        help="Budget ID declared by the selected registry (default: smoke).",
+    )
+    design.add_argument("--output", default="reports/live/experiment-design.json")
+    design.set_defaults(handler=_design_experiments)
     return parser
 
 

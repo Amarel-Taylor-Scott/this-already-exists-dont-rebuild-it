@@ -9,10 +9,18 @@ experiments cannot silently rewrite source observations.
 | `01_kaggle_build_capability_catalog.ipynb` | Static package, subpackage, module, class, function, and method extraction | normalized catalog, hierarchy, FTS index, Parquet mirrors, manifest |
 | `02_kaggle_generate_search_features.ipynb` | Attributes, descriptions, phrases, labels, keys, ports, edges, fingerprints, LSH buckets, and embedding variants | append-only feature ledger and versioned index projections |
 | `03_kaggle_small_model_routing_lab.ipynb` | Constrained goal/recipe selection, compatibility checks, multi-step routes, abstention, and mixture ablations | task predictions, candidate provenance, metrics, latency, and experiment manifest |
+| `04_kaggle_conditional_retrieval_model_sweep.ipynb` | Hardware/model qualification and bounded conditional design over retrieval, embeddings, LSH, indexes, planners, runtimes, and verification | hardware receipt, scheduled design, model qualification receipts, and retained failures |
 
 Each notebook starts with editable settings and Kaggle-compatible install/clone cells. Defaults are
 small smoke runs. Increasing a package list, embedding model, or route-task grid is an explicit
 configuration change recorded in the output manifest.
+
+Notebook 04 reads the 41-dimension, 38-constraint registry in
+[`configs/experiment_space.json`](../configs/experiment_space.json). Its default `mixed_screen`
+design is bounded by configuration count, resource tier, seed, and one of the `smoke`, `screen`,
+`confirm`, or `holdout` budgets. The generated design contains no measured performance claims.
+See the [conditional experiment-system guide](retrieval_model_experiment_system.md) for all stages,
+model/runtime qualification, storage and LSH options, metrics, and receipt requirements.
 
 ## Flexible features without an unbounded canonical schema
 
@@ -40,10 +48,15 @@ or LSH buckets in lookup tables while retaining a link to the same ledger record
 3. Attach that Dataset to notebook 02. Save each feature release separately rather than overwriting
    the catalog.
 4. Attach both releases to notebook 03 and run frozen retrieval/routing profiles.
-5. Download manifests, task-level predictions, and receipts before the Kaggle session expires.
+5. Use notebook 04 for hardware/model qualification and bounded sweep scheduling. Reuse the frozen
+   catalog/tasks and unload one external model before loading the next.
+6. Download manifests, task-level predictions, model/runtime receipts, failures, and execution
+   receipts before the Kaggle session expires.
 
 The catalog notebook does not import or execute target packages. Any later dynamic contract probes
 need a separate hardened runner; a Kaggle notebook is not a security boundary for hostile packages.
+Likewise, a model-generated description, edge, or route remains a candidate until reviewed and,
+where applicable, independently executed and accepted.
 
 ## Scaling rule
 

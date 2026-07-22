@@ -10,6 +10,7 @@ NOTEBOOKS = (
     "01_kaggle_build_capability_catalog.ipynb",
     "02_kaggle_generate_search_features.ipynb",
     "03_kaggle_small_model_routing_lab.ipynb",
+    "04_kaggle_conditional_retrieval_model_sweep.ipynb",
 )
 
 
@@ -48,8 +49,18 @@ def test_kaggle_notebooks_are_clean_runnable_sources() -> None:
 def test_notebooks_cover_symbol_features_and_constrained_routing() -> None:
     feature_notebook = (ROOT / "notebooks" / NOTEBOOKS[1]).read_text(encoding="utf-8")
     routing_notebook = (ROOT / "notebooks" / NOTEBOOKS[2]).read_text(encoding="utf-8")
+    sweep_notebook = (ROOT / "notebooks" / NOTEBOOKS[3]).read_text(encoding="utf-8")
 
     for required in ("feature_kind", "entity_id", "MinHash", "embedding"):
         assert required in feature_notebook
     for required in ("GoalIR", "RecipeIR", "no_reuse", "compatibility"):
         assert required in routing_notebook
+    for required in (
+        "mixed_screen",
+        "schedule_first_round",
+        "qualify_embedding_model",
+        "qualify_transformers_generator",
+        "qualify_ollama_generator",
+        "synthetic_smoke_only",
+    ):
+        assert required in sweep_notebook

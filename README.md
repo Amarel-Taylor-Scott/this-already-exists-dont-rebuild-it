@@ -46,6 +46,7 @@ UV_CACHE_DIR=/tmp/uv-cache uv sync --all-extras
 uv run reuse-code doctor
 uv run reuse-code ingest-installed --package pandas --package scikit-learn --package packaging
 uv run reuse-code benchmark-retrieval
+uv run reuse-code design-experiments --strategy mixed_screen --max-experiments 200 --budget smoke
 uv run reuse-code run-seed
 uv run pytest
 ```
@@ -65,9 +66,15 @@ Run the notebooks in order:
 3. [`03_kaggle_small_model_routing_lab.ipynb`](notebooks/03_kaggle_small_model_routing_lab.ipynb)
    evaluates deterministic and small-model route selection at symbol granularity, including
    compatibility gates, multi-step composition, hard negatives, and abstention.
+4. [`04_kaggle_conditional_retrieval_model_sweep.ipynb`](notebooks/04_kaggle_conditional_retrieval_model_sweep.ipynb)
+   qualifies the Kaggle hardware/model runtime and generates bounded, conditionally valid sweeps
+   across the versioned retrieval, embedding, index, LSH, planner, and verification registry.
 
-All three include Kaggle `!pip install` bootstrap cells and write measured artifacts under
-`/kaggle/working`. The optional generative arm defaults to Google's small
+All four include Kaggle `!pip install` bootstrap cells and write artifacts under
+`/kaggle/working`. A sweep design is a schedule rather than a measured result; model and retrieval
+receipts are written separately. The registry intentionally includes design-only options whose
+execution adapters have not yet been connected, and every manifest reports that partial runner
+coverage. The optional generative arm defaults to Google's small
 [Gemma 4 E2B](https://ai.google.dev/gemma/docs/core) checkpoint when enabled; deterministic
 validation remains authoritative. Large catalogs are produced as independently rerunnable shards,
 not as one 10,000-package in-memory notebook object.
@@ -104,6 +111,7 @@ wheel variants may contain different Python/native code and require separate ide
 - [Architecture and 10,000-package ingestion design](docs/architecture.md)
 - [Current research and adjacent systems](docs/research_landscape.md)
 - [Experiment and ablation matrix](docs/experiment_matrix.md)
+- [Conditional retrieval/model experiment system and Kaggle T4 guidance](docs/retrieval_model_experiment_system.md)
 - [Kaggle experiment notebooks and feature ledger](docs/kaggle_experiments.md)
 - [Initial engineering validation record](reports/initial-validation.json)
 - [Decisions, claims, and open questions](docs/decisions.md)
